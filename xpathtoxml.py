@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # change https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
+__author__ = 'Wang Ke'
 from xml.etree import ElementTree as ET
 import re
 from itertools import chain
