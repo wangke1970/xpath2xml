@@ -5,9 +5,13 @@ from xml.etree import ElementTree as ET
 import re
 from itertools import chain
 class xpath2xml:
-    def __init__(self,ns,root=None,root_name='data'):
+    def __init__(self,ns,root=None,root_name='nc:rpc'):
         for k,v in ns.items():
-            ET.register_namespace(k,v)
+            if v=='urn:ietf:params:xml:ns:netconf:base:1.0':
+                ET.register_namespace('',v)
+                ET.register_namespace('nc',v)
+            else:
+                ET.register_namespace(k,v)    
         self.root = ET.Element(root_name)
         self.parent = None
         self.xml = None
@@ -24,7 +28,6 @@ class xpath2xml:
             components.pop(0)
         node.attrib = ns
         while components:
-            # take in account positional  indexes in the form /path/para[3]]
             value_end = None
             attrib_value = None
             if "[" in components[0]:
@@ -102,10 +105,21 @@ class xpath2xml:
             else:
                 self._node_find(i,sub_node)
     
-def bulid(path_list,ns,create=False):
+def change_ns(ns):
+    ns_ns = {}
+    for k,v in ns.items():
+        if v == 'urn:ietf:params:xml:ns:netconf:base:1.0':
+            ns_ns['xmlns'] = v
+            ns_ns['xmlns:nc'] = v
+        else:
+            ns_ns['xmlns:'+k] = v
+    return ns_ns    
+
+def bulid(path_list,ns,root_name='nc:rpc'):
     if isinstance(ns,dict):
-        ns_ns = {'xmlns:'+k:v for k,v in ns.items()}
-    obj = xpath2xml(ns)
+        ns_ns = change_ns(ns)  
+    # ns_ns = {'xmlns:'+k:v for k,v in ns.items() if v!='urn:ietf:params:xml:ns:netconf:base:1.0'}
+    obj = xpath2xml(ns,root_name=root_name)
     for i in path_list:
         ret = obj(i,ns_ns)
     return ret
@@ -127,30 +141,35 @@ def build_xpath_string(path,nm):
         num_int = 1
         for num_nn in nm:
             num_int = num_int * int(num_nn)            
-        path = (path +'\n') * num_int
+        path = (path +'```') * num_int
         mm = _gen_multlist_code(nm)
         mm = tuple(list(chain.from_iterable(mm)))
         path = path.format(*mm)
-        return path
+        path = path.rstrip('```')
+        path_list = path.split('```')
+        return path_list
     else:
         print("Dimension error or {} not in []: Example build_xpath_string('aaa/bbb[{}]/ccc[{}]',['2','3'])")
             
 if __name__  == "__main__":
     #Example
 
-    ns = {'n0': 'urn:ietf:params:xml:ns:netconf:base:1.0', 'n1': 'http://openconfig.net/yang/bgp-policy', 'n2': 'http://openconfig.net/yang/types/inet', 'n3': 'http://openconfig.net/yang/bgp-types', 'n4': 'http://openconfig.net/yang/policy-types', 'n5': 'http://openconfig.net/yang/openconfig-types', 'n6': 'http://openconfig.net/yang/types/yang', 'n7': 'urn:ietf:params:xml:ns:yang:ietf-inet-types', 'n8': 'urn:ietf:params:xml:ns:yang:ietf-yang-types', 'n9': 'urn:ietf:params:xml:ns:yang:ietf-interfaces', 'n10': 'http://openconfig.net/yang/interfaces', 'n11': 'http://openconfig.net/yang/openconfig-ext', 'n12': 'http://openconfig.net/yang/bgp', 'n13': 'http://openconfig.net/yang/routing-policy'}
+    ns = {'nc': 'urn:ietf:params:xml:ns:netconf:base:1.0', 'n1': 'http://openconfig.net/yang/bgp-policy', 'n2': 'http://openconfig.net/yang/types/inet', 'n3': 'http://openconfig.net/yang/bgp-types', 'n4': 'http://openconfig.net/yang/policy-types', 'n5': 'http://openconfig.net/yang/openconfig-types', 'n6': 'http://openconfig.net/yang/types/yang', 'n7': 'urn:ietf:params:xml:ns:yang:ietf-inet-types', 'n8': 'urn:ietf:params:xml:ns:yang:ietf-yang-types', 'n9': 'urn:ietf:params:xml:ns:yang:ietf-interfaces', 'n10': 'http://openconfig.net/yang/interfaces', 'n11': 'http://openconfig.net/yang/openconfig-ext', 'n12': 'http://openconfig.net/yang/bgp', 'n13': 'http://openconfig.net/yang/routing-policy'}
 
-    path_list = ["n0:rpc/n0:edit-config/n0:config/n12:bgp/n12:peer-groups/n12:peer-group[3]/n12:apply-policy/n12:config/n12:import-policy[2]",
-                 "n0:rpc/n0:edit-config/n0:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]=aaa1",
-                 "n0:rpc/n0:edit-config/n0:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config[@n0:operation=merge]",
-                 "n0:rpc/n0:edit-config/n0:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[1]",]
+#    path_list = ["nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[3]/n12:apply-policy/n12:config/n12:import-policy[2]=zzz1",
+#                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]=zzz",
+#                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config[@nc:operation=merge]",
+#                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[1]=zzz",]
     
-    xxx = bulid(path_list,ns)
+    # params 1 is yang absolute path ,n12:peer-group[{}] is list,  n12:import-policy[{}] is leaf-list. params 2 is dimension. 
+    # this is build single leaf-list import-policy in openconfig-yang bgp module 
+    path_list = build_xpath_string("nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[{}]/n12:apply-policy/n12:config/n12:import-policy[{}]=zzz",['2','3'])
+    xxx = bulid(path_list,ns,root_name ='nc:rpc')
     print(xxx.xml)
+    # current xml path is nc:rpc ,nc:rpc is root. example remove one node
+    tp = xxx.remove('./nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]',ns)
 
-    tp = xxx.remove('./n0:rpc/n0:edit-config/n0:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]',ns)
     print(tp)
-    xxx_str = build_xpath_string("n0:rpc/n0:edit-config/n0:config/n12:bgp/n12:peer-groups/n12:peer-group[{}]/n12:apply-policy/n12:config/n12:import-policy[{}]",['2','3'])
-    print(xxx_str)
+
     print('end')
 
