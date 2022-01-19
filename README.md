@@ -1,2 +1,2 @@
 # xpath2xml
-build xml use like xpath
+build xml like xpath
