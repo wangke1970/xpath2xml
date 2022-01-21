@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 # change https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
 __author__ = 'Wang Ke'
+# └┕┖┗ ┘┙┚┛╘╙ 
 from xml.etree import ElementTree as ET
 import re
 from itertools import chain
 class xpath2xml:
     def __init__(self,ns,root=None,root_name='nc:rpc'):
         for k,v in ns.items():
-            if v=='urn:ietf:params:xml:ns:netconf:base:1.0':
-                ET.register_namespace('',v)
-                ET.register_namespace('nc',v)
-            else:
-                ET.register_namespace(k,v)    
+            ET.register_namespace(k,v)    
         self.root = ET.Element(root_name)
         self.parent = None
         self.xml = None
@@ -105,20 +102,9 @@ class xpath2xml:
             else:
                 self._node_find(i,sub_node)
     
-def change_ns(ns):
-    ns_ns = {}
-    for k,v in ns.items():
-        if v == 'urn:ietf:params:xml:ns:netconf:base:1.0':
-            ns_ns['xmlns'] = v
-            ns_ns['xmlns:nc'] = v
-        else:
-            ns_ns['xmlns:'+k] = v
-    return ns_ns    
-
 def bulid(path_list,ns,root_name='nc:rpc'):
     if isinstance(ns,dict):
-        ns_ns = change_ns(ns)  
-    # ns_ns = {'xmlns:'+k:v for k,v in ns.items() if v!='urn:ietf:params:xml:ns:netconf:base:1.0'}
+        ns_ns = {'xmlns:'+k:v for k,v in ns.items()}
     obj = xpath2xml(ns,root_name=root_name)
     for i in path_list:
         ret = obj(i,ns_ns)
