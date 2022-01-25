@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # change https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
 __author__ = 'Wang Ke'
 # └┕┖┗ ┘┙┚┛╘╙ 
@@ -27,8 +27,9 @@ class xpath2xml:
         while components:
             value_end = None
             attrib_value = None
+            components[0] = components[0].replace(' ','')
             if "[" in components[0]:
-                component, trail = components[0].replace(' ','').split("[",1)
+                component, trail = components[0].split("[",1)
                 pred = trail.split("=")[0].strip("]")
                 if pred.isdigit():
                     target_index = int(pred)
@@ -38,16 +39,19 @@ class xpath2xml:
                         print('[n] n must >= 0')
                         return
                     if "=" in trail:
-                        value_end = trail.replace(' ','').split("=")[-1].strip("]")
+                        value_end = trail.split("=")[-1].strip("]")
                 else:
-                    attrib_list = trail.replace(' ','').strip("]").strip("@").split("=",1)
-                    attrib_value = {attrib_list[0]:attrib_list[1]}
+#                    attrib_list = trail.strip("]").strip("@").split("=",1)
+                    attrib_list = trail.strip("]").split("@")
+                    attrib_list = list(filter(None,attrib_list)) 
+                    attrib_list_dict = {i.split("=",1)[0]:i.split("=",1)[1] for i in attrib_list}
+                    attrib_value = attrib_list_dict
                     target_index = 0
             elif "=" in components[0]:
-                component, value_end = components[0].replace(' ','').split("=",1)
+                component, value_end = components[0].split("=",1)
                 target_index = 0
             else:
-                component = components[0].replace(' ','')
+                component = components[0]
                 target_index = 0
             
             components.pop(0)
@@ -140,17 +144,18 @@ def build_xpath_string(path,nm):
 if __name__  == "__main__":
     #Example
 
-    ns = {'nc': 'urn:ietf:params:xml:ns:netconf:base:1.0', 'n1': 'http://openconfig.net/yang/bgp-policy', 'n2': 'http://openconfig.net/yang/types/inet', 'n3': 'http://openconfig.net/yang/bgp-types', 'n4': 'http://openconfig.net/yang/policy-types', 'n5': 'http://openconfig.net/yang/openconfig-types', 'n6': 'http://openconfig.net/yang/types/yang', 'n7': 'urn:ietf:params:xml:ns:yang:ietf-inet-types', 'n8': 'urn:ietf:params:xml:ns:yang:ietf-yang-types', 'n9': 'urn:ietf:params:xml:ns:yang:ietf-interfaces', 'n10': 'http://openconfig.net/yang/interfaces', 'n11': 'http://openconfig.net/yang/openconfig-ext', 'n12': 'http://openconfig.net/yang/bgp', 'n13': 'http://openconfig.net/yang/routing-policy'}
+    ns = {'yang': 'urn:ietf:params:xml:ns:yang:ietf-yang-types', 'nc': 'urn:ietf:params:xml:ns:netconf:base:1.0', 'n1': 'http://openconfig.net/yang/bgp-policy', 'n2': 'http://openconfig.net/yang/types/inet', 'n3': 'http://openconfig.net/yang/bgp-types', 'n4': 'http://openconfig.net/yang/policy-types', 'n5': 'http://openconfig.net/yang/openconfig-types', 'n6': 'http://openconfig.net/yang/types/yang', 'n7': 'urn:ietf:params:xml:ns:yang:ietf-inet-types', 'n8': 'urn:ietf:params:xml:ns:yang:ietf-yang-types', 'n9': 'urn:ietf:params:xml:ns:yang:ietf-interfaces', 'n10': 'http://openconfig.net/yang/interfaces', 'n11': 'http://openconfig.net/yang/openconfig-ext', 'n12': 'http://openconfig.net/yang/bgp', 'n13': 'http://openconfig.net/yang/routing-policy'}
 
-#    path_list = ["nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[3]/n12:apply-policy/n12:config/n12:import-policy[2]=zzz1",
-#                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]=zzz",
-#                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config[@nc:operation=merge]",
-#                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[1]=zzz",]
+    path_list = ["nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config[@nc:operation=merge @yang:insert=replace]",
+                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[3]/n12:apply-policy/n12:config/n12:import-policy[2]=zzz1",
+                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]=zzz",
+                 "nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[1]=zzz",]
     
     # params 1 is yang absolute path ,n12:peer-group[{}] is list,  n12:import-policy[{}] is leaf-list. params 2 is dimension. 
     # this is build single leaf-list import-policy in openconfig-yang bgp module 
-    path_list = build_xpath_string("nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[{}]/n12:apply-policy/n12:config/n12:import-policy[{}]=zzz",['2','3'])
+#    path_list = build_xpath_string("nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[{}]/n12:apply-policy/n12:config/n12:import-policy[{}]=zzz",['2','3'])
     xxx = bulid(path_list,ns,root_name ='nc:rpc')
+#    xxx('nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[@yang:insert="before"]',ns)
     print(xxx.xml)
     # current xml path is nc:rpc ,nc:rpc is root. example remove one node
     tp = xxx.remove('./nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]',ns)
