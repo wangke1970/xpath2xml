@@ -41,7 +41,6 @@ class xpath2xml:
                     if "=" in trail:
                         value_end = trail.split("=")[-1].strip("]")
                 else:
-#                    attrib_list = trail.strip("]").strip("@").split("=",1)
                     attrib_list = trail.strip("]").split("@")
                     attrib_list = list(filter(None,attrib_list)) 
                     attrib_list_dict = {i.split("=",1)[0]:i.split("=",1)[1] for i in attrib_list}
