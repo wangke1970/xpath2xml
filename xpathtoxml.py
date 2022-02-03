@@ -6,7 +6,7 @@ from xml.etree import ElementTree as ET
 import re
 from itertools import chain
 class xpath2xml:
-    def __init__(self,ns,root=None,root_name='nc:rpc'):
+    def __init__(self,ns,root_name='nc:rpc'):
         for k,v in ns.items():
             ET.register_namespace(k,v)    
         self.root = ET.Element(root_name)
@@ -121,6 +121,7 @@ class xpath2xml:
             ret = node_tree.add_child(chang_ns(i.tag),i)
             self._tree(ret,i)
     
+    @property
     def tree(self):    
         self._tree(self.root_tree,self.root)
         self.root_tree.index_node()
@@ -135,16 +136,6 @@ class xpath2xml:
         path = re.sub('(?P<num>\[[0-9]+\])',self._num_matched,path)
         xml_node_list = self.root.findall(path,self.ns)
         return xml_node_list
-    
-    
-#    def find_by_value(self,value):
-#        def chang_ns(name):
-#            ns = {v:k for k,v in self.ns.items()}
-#            name = ns[name.lstrip('{').split('}')[0]]+':'+name.lstrip('{').split('}')[1]
-#            return name
-#        l = [i for i in self.root.iter() if i.text==value]
-#        node_dict = {i:chang_ns(i.tag) for i in self.root.iter() if '{' in i.tag}
-#        return node_dict
     
     def remove(self,path):
         path = re.sub('(?P<num>\[[0-9]+\])',self._num_matched,path)        
@@ -204,7 +195,7 @@ class TreeNode(object):
 
     @property
     def path(self):
-        """return path string (from root to current node) recursion"""
+        # return path string (from root to current node) recursion
         if self.parent:
             ret = '%s/%s' % (self.parent.path.strip(), self.name)
             return ret
@@ -212,7 +203,7 @@ class TreeNode(object):
             return self.name
 
     def get_child(self, name):
-        """get a child node of current node"""
+        # get a child node of current node
         for i in self.child:
             if i[0] == name:
                 return i[1]        
@@ -225,12 +216,11 @@ class TreeNode(object):
         return obj
 
     def del_child(self, name):
-        """remove a child node from current node"""
+        #remove a child node from current node
         self.child = [i for i in self.child if i[0]!=name]
         
     def find_child(self, path):
-        """find child node by path/name, return None if not found"""
-        # convert path to a list if input is a string
+        # find child node by ['a','b','c'] or 'a/b/c', return None if not found"""
         path = path if isinstance(path, list) else path.split('/')
         cur = self
         for sub in path:
@@ -242,8 +232,8 @@ class TreeNode(object):
             cur = obj
         return obj
 
-    def dump(self,ss,indent=0):
-        """dump tree to string"""
+    def _dump(self,ss,indent):
+        # tree to string
         # ╚ ∟ ┗ └
         tab = '    '*(indent-1) + ' ├ ' if indent > 0 else ''
         if self.data.text:
@@ -253,7 +243,14 @@ class TreeNode(object):
             ret = '%s%s%s' % (tab, str(self.name),'\n')
             ss[0] += ret
         for i in self.child:
-            i[1].dump(ss,indent+1)
+            i[1]._dump(ss,indent+1)
+    
+    @property 
+    def dump(self):
+        dump_dict = {0:''}
+        indent=0
+        self._dump(dump_dict,indent)
+        return dump_dict[0]
     
     def index_node(self):
         if self.child == []:
@@ -270,7 +267,26 @@ class TreeNode(object):
                     num+=1        
         for i in self.child:
             i[1].index_node()
-                
+    
+    @property            
+    def get_xml(self):
+        return {'tag':self.data.tag,'attrib':self.data.attrib,'value':self.data.text}
+    
+    def set_xml_tag(self, tag):
+        self.data.tag = tag
+        return self
+    
+    def set_xml_attrib(self, attrib):
+        if isinstance(attrib,dcit):
+            self.data.attrib = attrib
+        else:
+            print('Error attrib must dict !')
+        return self    
+    
+    def set_xml_text(self, text):
+        self.data.text = text
+        return self
+    
     def get_parent(self):
         if isinstance(self.parent.name,str):
             return self.parent
@@ -307,6 +323,7 @@ if __name__  == "__main__":
     ns = {'yang': 'urn:ietf:params:xml:ns:yang:ietf-yang-types', 'nc': 'urn:ietf:params:xml:ns:netconf:base:1.0', 'n1': 'http://openconfig.net/yang/bgp-policy', 'n2': 'http://openconfig.net/yang/types/inet', 'n3': 'http://openconfig.net/yang/bgp-types', 'n4': 'http://openconfig.net/yang/policy-types', 'n5': 'http://openconfig.net/yang/openconfig-types', 'n6': 'http://openconfig.net/yang/types/yang', 'n7': 'urn:ietf:params:xml:ns:yang:ietf-inet-types','n9': 'urn:ietf:params:xml:ns:yang:ietf-interfaces', 'n10': 'http://openconfig.net/yang/interfaces', 'n11': 'http://openconfig.net/yang/openconfig-ext', 'n12': 'http://openconfig.net/yang/bgp', 'n13': 'http://openconfig.net/yang/routing-policy'}
     # init object and xml root nc:rpc
     xxx = xpath2xml(ns,'nc:rpc')
+    xxx1 = xpath2xml(ns,'data')
     
     path_list = ["nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[2]/n12:apply-policy/n12:config/n12:import-policy[@nc:operation=create @yang:insert=after]=z",
                  "nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[3]/n12:apply-policy/n12:config/n12:import-policy[2]=zzzzz",
@@ -332,21 +349,34 @@ if __name__  == "__main__":
     print(xxx.xml)
     # nc:rpc is root. xml.etree xpath not support Absolute path.
     tp = xxx.remove('./nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]')
+#    tp = xxx.remove('nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]')
+
     print(tp.xml)
 
     path_str = 'nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[0]={para}'
     path_str = path_str.format(para = 'aaaaa')
     tp  = tp.add(path_str)
     
-    insert_path_point = "./nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config"
-    tp = xxx.append(insert_path_point,'n12:aaaa/n12:bbbb=ccc')
-    tp = xxx.extend(insert_path_point,['n12:aaaa[1]/n12:bbbb=ccc','n12:aaaa[2]/n12:bbbb=ccc'])
+    insert_point = "./nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config"
+    tp = xxx.append(insert_point,'n12:aaaa/n12:bbbb=ccc')
+    tp = xxx.extend(insert_point,['n12:aaaa[1]/n12:bbbb=ccc','n12:aaaa[2]/n12:bbbb=ccc'])
     print(tp.xml)
-    # find_nodes input parent node name and child node name return child list
-    tree = xxx.tree()
-    ss=['']
-    tree.dump(ss)
-    print(ss[0])
-
+    # tree xml object
+    tree = xxx.tree
+    # find xml node by tree 
+    tp_1 = tree.find_child('nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]')
+    tp_2 = tree.find_child(['nc:edit-config','nc:config','n12:bgp','n12:peer-groups','n12:peer-group[0]'])
+    # get nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0] xml node retun a dict
+    # return is  {'tag': '{http://openconfig.net/yang/bgp}peer-group', 'attrib': {}, 'value': None}
+    # notice xml not need [0],{http://openconfig.net/yang/bgp} is n12:
+    xml_node_detail = tp_2.get_xml
+    print(xml_node_detail)
+    tp_2 = tp_2.set_xml_text('aaaa')
+    ss = tree.dump
+    print(ss)
+    print(xxx1.xml)
+    print(tp_2.path)
+    xxx1.add("nc:rpc/nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config/n12:import-policy[1]=zzz_000")
+    print(xxx1.xml)
     print('end')
 
