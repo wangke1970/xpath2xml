@@ -45,22 +45,38 @@ print(ss)
 
 nc:rpc
  ├ nc:edit-config
+ 
      ├ nc:config
+     
          ├ oc-bgp:bgp
+         
              ├ oc-bgp:peer-groups
+             
                  ├ oc-bgp:peer-group[0]
+                 
                      ├ oc-bgp:apply-policy
+                     
                          ├ oc-bgp:config
+                         
                              ├ oc-bgp:import-policy[0]
                              ├ oc-bgp:import-policy[1]
+                             
                              ├ oc-bgp:default-import-policy
+                             
                              ├ oc-bgp:export-policy[0]
                              ├ oc-bgp:export-policy[1]
+                             
                              ├ oc-bgp:default-export-policy
                  ├ oc-bgp:peer-group[1]
+                     
                      ├ oc-bgp:apply-policy
+                         
                          ├ oc-bgp:config
+                             
                              ├ oc-bgp:import-policy
+                             
                              ├ oc-bgp:default-import-policy
+                             
                              ├ oc-bgp:export-policy
+                             
                              ├ oc-bgp:default-export-policy
