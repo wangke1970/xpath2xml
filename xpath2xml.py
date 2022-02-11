@@ -26,13 +26,13 @@ class xpath2xml:
         self._build(self.root,path)
         return self
 
-    def append(self,insert_path_point,path):
+    def insert(self,insert_path_point,path):
         insert_path_point = re.sub('(?P<num>\[[0-9]+\])',self._num_matched,insert_path_point)
         node = self.root.find(insert_path_point,self.ns)
         self._build(node,path)
         return self
     
-    def extend(self,insert_path_point,paths):
+    def inserts(self,insert_path_point,paths):
         insert_path_point = re.sub('(?P<num>\[[0-9]+\])',self._num_matched,insert_path_point)
         node = self.root.find(insert_path_point,self.ns)
         for i in paths:
