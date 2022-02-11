@@ -44,9 +44,7 @@ print(ss)
 
 
 nc:rpc
- 
  ├ nc:edit-config
- 
      ├ nc:config
      
          ├ oc-bgp:bgp
