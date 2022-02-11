@@ -35,8 +35,8 @@ def test_all():
     tp  = tp.add(path_str)
     
     insert_point = "./nc:edit-config/nc:config/n12:bgp/n12:peer-groups/n12:peer-group[0]/n12:apply-policy/n12:config"
-    tp = xxx.append(insert_point,'n12:aaaa/n12:bbbb=ccc')
-    tp = xxx.extend(insert_point,['n12:aaaa[1]/n12:bbbb=ccc','n12:aaaa[2]/n12:bbbb=ccc'])
+    tp = xxx.insert(insert_point,'n12:aaaa/n12:bbbb=ccc')
+    tp = xxx.inserts(insert_point,['n12:aaaa[1]/n12:bbbb=ccc','n12:aaaa[2]/n12:bbbb=ccc'])
     print(tp.xml)
     # tree xml object
     tree = xxx.tree
