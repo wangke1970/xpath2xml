@@ -35,9 +35,14 @@ tree = bgp_x.tree
 ss = tree.dump
 
 print(ss)
+
+
 ######################out############################
+
 <?xml version='1.0' encoding='utf-8'?>
 <nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:oc-bgp="http://openconfig.net/yang/bgp"><nc:edit-config><nc:config><oc-bgp:bgp><oc-bgp:peer-groups><oc-bgp:peer-group><oc-bgp:apply-policy><oc-bgp:config><oc-bgp:import-policy /><oc-bgp:import-policy /><oc-bgp:default-import-policy /><oc-bgp:export-policy /><oc-bgp:export-policy /><oc-bgp:default-export-policy /></oc-bgp:config></oc-bgp:apply-policy></oc-bgp:peer-group><oc-bgp:peer-group><oc-bgp:apply-policy><oc-bgp:config><oc-bgp:import-policy /><oc-bgp:default-import-policy /><oc-bgp:export-policy /><oc-bgp:default-export-policy /></oc-bgp:config></oc-bgp:apply-policy></oc-bgp:peer-group></oc-bgp:peer-groups></oc-bgp:bgp></nc:config></nc:edit-config></nc:rpc>
+
+
 nc:rpc
  ├ nc:edit-config
      ├ nc:config
