@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
+
 __author__ = 'Wang Ke'
 # └┕┖┗ ┘┙┚┛╘╙ 
 from xml.etree import ElementTree as ET
@@ -39,6 +39,7 @@ class xpath2xml:
             self._build(node,i)
         return self    
     
+    # https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
     def _build(self, node, path):
         components = path.split("/")
         if components[0] == node.tag:
