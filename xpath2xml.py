@@ -97,18 +97,23 @@ class xpath2xml:
                         break
             else:
                 for i in range(target_index - found_index):
-                    if value_end:
-                        new_node = ET.Element(component)
-                        new_node.text = value_end
-                        if attrib_value :
-                            new_node.attrib = attrib_value                    
-                    else:
-                        new_node = ET.Element(component)
-                        if attrib_value :
-                            new_node.attrib = attrib_value                    
+                    new_node = ET.Element(component)
+#                    if value_end:
+#                        new_node = ET.Element(component)
+#                        new_node.text = value_end
+#                        if attrib_value :
+#                            new_node.attrib = attrib_value                    
+#                    else:
+#                        new_node = ET.Element(component)
+#                        if attrib_value :
+#                            new_node.attrib = attrib_value                    
                     node.append(new_node)
                 node = new_node
-    
+                if value_end:
+                    new_node.text = value_end
+                if attrib_value :
+                    new_node.attrib = attrib_value   
+                        
     def _tree(self,node_tree,node_xml):
         def chang_ns(name):
             ns = {v:k for k,v in self.ns.items()}
