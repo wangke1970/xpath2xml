@@ -108,7 +108,6 @@ class xpath2xml:
                             new_node.attrib = attrib_value                    
                     node.append(new_node)
                 node = new_node
-                self.point = node
     
     def _tree(self,node_tree,node_xml):
         def chang_ns(name):
