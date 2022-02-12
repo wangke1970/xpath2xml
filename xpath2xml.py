@@ -68,8 +68,6 @@ class xpath2xml:
                     except AssertionError as asser:
                         print('[n] n must >= 0')
                         return
-                    if "=" in trail:
-                        value_end = trail.split("=")[-1].strip("]")
                 else:
                     attrib_list = trail.strip("]").split("@")
                     attrib_list = list(filter(None,attrib_list)) 
