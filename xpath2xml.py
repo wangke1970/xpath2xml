@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# change https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
+# https://stackoverflow.com/questions/5661968/how-to-populate-xml-file-using-xpath-in-python
 __author__ = 'Wang Ke'
 # └┕┖┗ ┘┙┚┛╘╙ 
 from xml.etree import ElementTree as ET
