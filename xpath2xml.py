@@ -70,7 +70,7 @@ class xpath2xml:
                         print('[n] n must >= 0')
                         return
                 else:
-                    attrib_list = trail.strip("]").split("@")
+                    attrib_list = trail.strip("]").split(",")
                     attrib_list = list(filter(None,attrib_list)) 
                     attrib_list_dict = {i.split("=",1)[0]:i.split("=",1)[1] for i in attrib_list}
                     attrib_value = attrib_list_dict
